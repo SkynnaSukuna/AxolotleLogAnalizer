@@ -2,8 +2,10 @@
 
 <img width="1268" height="830" alt="Снимок экрана 2026-06-26 195424" src="https://github.com/user-attachments/assets/89fad37f-d833-48f3-81e9-d4ebdbd4595d" /> 
 
+<img width="50" height="50" alt="ChatGPT Image 26 июн  2026 г , 19_13_17" src="https://github.com/user-attachments/assets/1d1e4ee3-fb57-4d5a-94ee-a8e5f496b852" />
 
 **Добро пожаловать в AxolotleLogAnalyzer**!
+
 Это приложение поможет вам анализировать логи, находить ошибки и сохранять решения. Сделаное Skynna.
 
 ---
