@@ -1,6 +1,7 @@
-import { useCallback, useRef, useEffect } from 'react';
-import type { LogEntry } from '../../types';
+import { useCallback, useRef, useEffect, useState } from 'react';
+import type { LogEntry, LogStatus } from '../../types';
 import { Badge } from '../ui/Badge';
+import { StatusDropdown } from '../ui/StatusDropdown';
 
 interface LogItemProps {
   log: LogEntry;
@@ -10,6 +11,7 @@ interface LogItemProps {
   onDragLeave: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent) => void;
   onContextMenu?: (e: React.MouseEvent, log: LogEntry) => void;
+  onStatusChange?: (logId: string, status: LogStatus) => void;
   isEditing?: boolean;
   editName?: string;
   onEditNameChange?: (name: string) => void;
@@ -30,8 +32,11 @@ export function LogItem({
   onEditNameChange,
   onCommitRename,
   onCancelRename,
+  onStatusChange,
 }: LogItemProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [statusPickerOpen, setStatusPickerOpen] = useState(false);
+  const badgeRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     if (isEditing) {
@@ -75,7 +80,26 @@ export function LogItem({
         ) : (
           <span className="log-file-name">{log.fileName}</span>
         )}
-        <Badge status={log.status} />
+        <span ref={badgeRef} style={{ position: 'relative', display: 'inline-block' }}>
+          <Badge
+            status={log.status}
+            onClick={() => setStatusPickerOpen((p) => !p)}
+          />
+          {statusPickerOpen && badgeRef.current && (
+            <StatusDropdown
+              current={log.status}
+              onChange={(s) => {
+                onStatusChange?.(log.id, s);
+                setStatusPickerOpen(false);
+              }}
+              onClose={() => setStatusPickerOpen(false)}
+              style={{
+                top: (badgeRef.current.getBoundingClientRect().bottom + 4),
+                left: badgeRef.current.getBoundingClientRect().left,
+              }}
+            />
+          )}
+        </span>
       </div>
       <p className="log-preview">{getPreview(log.content)}</p>
       <span className="log-date">

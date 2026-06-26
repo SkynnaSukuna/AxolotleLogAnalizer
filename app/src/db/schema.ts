@@ -54,7 +54,19 @@ export class AppDatabase extends Dexie {
       projects: '++id, name, createdAt, updatedAt',
       logs: '++id, projectId, fileName, status, *tags, hash, createdAt, updatedAt',
       chats: '++id, logId, title, createdAt',
-      notes: '++id, logId, projectId, stackTraceHash, fuzzyHash, isGlobal, *tags, createdAt, updatedAt',
+      notes: '++id, logId, projectId, stackTraceHash, fuzzyHash, isGlobal, status, *tags, createdAt, updatedAt',
+      pinnedErrors: '++id, logId, projectId, stackTraceHash, pinnedAt',
+      bookmarks: '++id, logId, projectId, lineNumber, createdAt',
+      tags: '++id, name, createdAt',
+      settings: 'id',
+      aiConfigs: '++id, name, provider, lastUsedAt',
+    });
+
+    this.version(6).stores({
+      projects: '++id, name, createdAt, updatedAt',
+      logs: '++id, projectId, fileName, status, *tags, hash, createdAt, updatedAt',
+      chats: '++id, logId, title, createdAt',
+      notes: '++id, logId, projectId, stackTraceHash, fuzzyHash, isGlobal, status, *tags, createdAt, updatedAt',
       pinnedErrors: '++id, logId, projectId, stackTraceHash, pinnedAt',
       bookmarks: '++id, logId, projectId, lineNumber, createdAt',
       tags: '++id, name, createdAt',

@@ -27,6 +27,7 @@ export function useNotes(projectId?: string) {
       solution: string;
       tags?: string[];
       isGlobal?: boolean;
+      status?: import('../types').NoteStatus;
     }) => {
       const { exact, fuzzy } = computeStackTraceHash(data.errorSnippet);
       const id = `note_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
@@ -41,6 +42,7 @@ export function useNotes(projectId?: string) {
         solution: data.solution,
         tags: data.tags ?? [],
         isGlobal: data.isGlobal ?? false,
+        status: data.status ?? 'open',
         createdAt: new Date(),
         updatedAt: new Date(),
       });

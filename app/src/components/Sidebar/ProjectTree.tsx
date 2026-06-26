@@ -6,7 +6,7 @@ import { LogItem } from './LogItem';
 import { Button } from '../ui/Button';
 import { SidebarContextMenu } from './SidebarContextMenu';
 import { ConfirmModal } from '../ui/ConfirmModal';
-import type { Project, LogEntry } from '../../types';
+import type { Project, LogEntry, LogStatus } from '../../types';
 
 interface ProjectTreeProps {
   activeProjectId?: string;
@@ -222,6 +222,14 @@ export function ProjectTree({ activeProjectId, selectedLogId, onSelectProject, o
     setContextMenu(null);
   }, [contextMenu]);
 
+  /* ── log status change ── */
+
+  const handleLogStatusChange = useCallback(async (logId: string, status: LogStatus) => {
+    console.log('[ProjectTree] handleLogStatusChange — logId:', logId, 'status:', status);
+    const updated = await db.logs.update(logId, { status, updatedAt: new Date() });
+    console.log('[ProjectTree] db.logs.update result:', updated, '(1 = ok, 0 = not found)');
+  }, []);
+
   /* ── confirm delete ── */
 
   const handleConfirmDelete = useCallback(async () => {
@@ -396,6 +404,7 @@ export function ProjectTree({ activeProjectId, selectedLogId, onSelectProject, o
                           isSelected={selectedLogId === log.id}
                           onSelect={onSelectLog}
                           onContextMenu={handleLogContextMenu}
+                          onStatusChange={handleLogStatusChange}
                           isEditing={editingLogId === log.id}
                           editName={editingLogName}
                           onEditNameChange={setEditingLogName}
@@ -438,6 +447,7 @@ export function ProjectTree({ activeProjectId, selectedLogId, onSelectProject, o
           onAddLog={contextMenu.type === 'project' ? handleProjectAddLog : undefined}
           onOpen={contextMenu.type === 'log' ? handleLogOpen : undefined}
           onCopyPath={contextMenu.type === 'log' ? handleLogCopyPath : undefined}
+          onChangeStatus={contextMenu.type === 'log' ? handleLogStatusChange : undefined}
           onProperties={contextMenu.type === 'project' ? handleProjectProperties : handleLogProperties}
         />
       )}

@@ -1,5 +1,13 @@
 import { useState, useEffect } from 'react';
 import { TagInput } from './TagInput';
+import type { NoteStatus } from '../../types';
+
+const STATUS_OPTIONS: { value: NoteStatus; label: string; color: string }[] = [
+  { value: 'open', label: 'Открыто', color: '#3b82f6' },
+  { value: 'in_progress', label: 'В работе', color: '#eab308' },
+  { value: 'resolved', label: 'Решено', color: '#22c55e' },
+  { value: 'wontfix', label: 'Не баг', color: '#6b7280' },
+];
 
 interface NoteEditorProps {
   initial: {
@@ -8,6 +16,7 @@ interface NoteEditorProps {
     solution?: string;
     tags?: string[];
     isGlobal?: boolean;
+    status?: NoteStatus;
   };
   onSave: (data: {
     errorSnippet: string;
@@ -15,6 +24,7 @@ interface NoteEditorProps {
     solution: string;
     tags: string[];
     isGlobal: boolean;
+    status: NoteStatus;
   }) => void;
   onCancel: () => void;
 }
@@ -25,6 +35,7 @@ export function NoteEditor({ initial, onSave, onCancel }: NoteEditorProps) {
   const [solution, setSolution] = useState(initial.solution ?? '');
   const [tags, setTags] = useState<string[]>(initial.tags ?? []);
   const [isGlobal, setIsGlobal] = useState(initial.isGlobal ?? false);
+  const [status, setStatus] = useState<NoteStatus>(initial.status ?? 'open');
 
   useEffect(() => {
     setErrorSnippet(initial.errorSnippet ?? '');
@@ -32,6 +43,7 @@ export function NoteEditor({ initial, onSave, onCancel }: NoteEditorProps) {
     setSolution(initial.solution ?? '');
     setTags(initial.tags ?? []);
     setIsGlobal(initial.isGlobal ?? false);
+    setStatus(initial.status ?? 'open');
   }, [initial]);
 
   const handleSave = () => {
@@ -42,6 +54,7 @@ export function NoteEditor({ initial, onSave, onCancel }: NoteEditorProps) {
       solution: solution.trim(),
       tags,
       isGlobal,
+      status,
     });
   };
 
@@ -79,6 +92,21 @@ export function NoteEditor({ initial, onSave, onCancel }: NoteEditorProps) {
       <div className="input-group">
         <label className="input-label">Теги</label>
         <TagInput selected={tags} onChange={setTags} />
+      </div>
+      <div className="input-group">
+        <label className="input-label">Статус</label>
+        <select
+          className="input"
+          value={status}
+          onChange={(e) => setStatus(e.target.value as NoteStatus)}
+          style={{ color: STATUS_OPTIONS.find((s) => s.value === status)?.color ?? undefined }}
+        >
+          {STATUS_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value} style={{ color: opt.color }}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
       </div>
       <label className="notes-global-label">
         <input

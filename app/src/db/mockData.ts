@@ -139,6 +139,7 @@ export const mockNotes: Note[] = [
     solution: 'Implement automatic token refresh using refresh tokens stored in httpOnly cookies',
     tags: ['jwt', 'auth'],
     isGlobal: false,
+    status: 'open',
     createdAt: new Date('2026-06-25T12:00:00'),
     updatedAt: new Date('2026-06-25T12:00:00'),
   },

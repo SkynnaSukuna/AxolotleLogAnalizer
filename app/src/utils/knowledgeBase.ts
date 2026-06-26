@@ -50,6 +50,7 @@ export async function importKnowledgeBase(json: string): Promise<{ notes: number
       solution: note.solution,
       tags: note.tags ?? [],
       isGlobal: note.isGlobal ?? false,
+      status: note.status ?? 'open',
       createdAt: note.createdAt ? new Date(note.createdAt) : new Date(),
       updatedAt: note.updatedAt ? new Date(note.updatedAt) : new Date(),
     });

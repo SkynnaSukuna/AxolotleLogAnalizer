@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import type { BlockType, TabType, VirtualItem } from '../../types/logTypes';
-import type { Note } from '../../types';
+import type { Note, LogStatus } from '../../types';
 import { parseLogIntoBlocks } from '../../utils/logParser';
 import { computeStackTraceHash, fuzzyHashFromText } from '../../utils/stackTraceHash';
 import { VirtualList } from './VirtualList';
@@ -12,7 +12,6 @@ import { TabBar } from './TabBar';
 import { db } from '../../db/schema';
 import { CustomContextMenu } from '../ui/CustomContextMenu';
 import type { ContextMenuItem } from '../ui/CustomContextMenu';
-
 export interface LogViewerHandle {
   scrollToLine: (lineNumber: number) => void;
   scrollToBlock: (blockId: number) => void;
@@ -31,9 +30,11 @@ interface LogViewerProps {
   content: string;
   logId?: string;
   projectId?: string;
+  currentStatus?: LogStatus;
   onErrorContextMenu?: (errorSnippet: string, blockId: number) => void;
   onPinError?: (blockId: number, errorText: string, stackTraceHash: string) => void;
   onBookmarkLine?: (lineNumber: number, text: string) => void;
+  onChangeLogStatus?: (logId: string, status: LogStatus) => void;
 }
 
 const ROW_HEIGHT = 28;
@@ -48,9 +49,11 @@ export const LogViewer = forwardRef<LogViewerHandle, LogViewerProps>(function Lo
   content,
   logId,
   projectId,
+  currentStatus,
   onErrorContextMenu,
   onPinError,
   onBookmarkLine,
+  onChangeLogStatus,
 }, ref) {
   const blocks = useMemo(() => parseLogIntoBlocks(content ?? ''), [content]);
 
@@ -144,11 +147,13 @@ export const LogViewer = forwardRef<LogViewerHandle, LogViewerProps>(function Lo
     onErrorContextMenu?: (errorSnippet: string, blockId: number) => void;
     onPinError?: (blockId: number, errorText: string, stackTraceHash: string) => void;
     onBookmarkLine?: (lineNumber: number, text: string) => void;
+    onChangeLogStatus?: (logId: string, status: LogStatus) => void;
   }>({});
 
   ctxDataRef.current.onErrorContextMenu = onErrorContextMenu;
   ctxDataRef.current.onPinError = onPinError;
   ctxDataRef.current.onBookmarkLine = onBookmarkLine;
+  ctxDataRef.current.onChangeLogStatus = onChangeLogStatus;
 
   const handleContextMenu = useCallback(
     (e: React.MouseEvent, blockId: number, lineText: string, blockLines: string[], blockType: BlockType, originalIndex: number) => {
@@ -243,6 +248,34 @@ export const LogViewer = forwardRef<LogViewerHandle, LogViewerProps>(function Lo
       },
     );
 
+    const STATUS_LABELS: Record<LogStatus, string> = {
+      new: 'Новый',
+      in_progress: 'В работе',
+      resolved: 'Решено',
+      archived: 'Архив',
+    };
+    const STATUS_ORDER: LogStatus[] = ['new', 'in_progress', 'resolved', 'archived'];
+
+    const changeStatusHandler = callbacks.onChangeLogStatus;
+
+    if (changeStatusHandler && logId) {
+      items.push({
+        type: 'submenu',
+        id: 'change-log-status',
+        label: 'Сменить статус лога',
+        icon: '\uD83D\uDD04',
+        children: STATUS_ORDER.map((key) => ({
+          type: 'action' as const,
+          id: `status-${key}`,
+          label: (key === currentStatus ? '\u2713 ' : '') + STATUS_LABELS[key],
+          onClick: () => {
+            console.log('[LogViewer] status click — logId:', logId, 'status:', key);
+            changeStatusHandler(logId, key);
+          },
+        })),
+      });
+    }
+
     items.push({ type: 'separator' });
 
     items.push({
@@ -262,7 +295,7 @@ export const LogViewer = forwardRef<LogViewerHandle, LogViewerProps>(function Lo
     });
 
     return items;
-  }, [contextMenu]);
+  }, [contextMenu, currentStatus, logId]);
 
   const allItems = useMemo<VirtualItem[]>(() => {
     const items: VirtualItem[] = [];

@@ -1,4 +1,5 @@
 export type LogStatus = 'new' | 'in_progress' | 'resolved' | 'archived';
+export type NoteStatus = 'open' | 'in_progress' | 'resolved' | 'wontfix';
 
 export type ThemeMode = 'light' | 'dark' | 'terminal' | 'ide';
 
@@ -53,6 +54,7 @@ export interface Note {
   solution: string;
   tags: string[];
   isGlobal: boolean;
+  status: NoteStatus;
   createdAt: Date;
   updatedAt: Date;
 }

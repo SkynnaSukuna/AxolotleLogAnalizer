@@ -9,7 +9,7 @@ import { FirstUseOverlay } from './components/FirstUseOverlay';
 import { seedMockData } from './db/mockData';
 import { db } from './db/schema';
 import { logger } from './utils/logger';
-import type { LogEntry, AIAnalysisResult } from './types';
+import type { LogEntry, AIAnalysisResult, LogStatus } from './types';
 
 export default function App() {
   const [ready, setReady] = useState(false);
@@ -148,6 +148,18 @@ export default function App() {
     [selectedLog],
   );
 
+  const handleChangeLogStatus = useCallback(
+    async (logId: string, status: LogStatus) => {
+      console.log('[App] handleChangeLogStatus — logId:', logId, 'status:', status);
+      const updated = await db.logs.update(logId, { status, updatedAt: new Date() });
+      console.log('[App] db.logs.update result:', updated, '(1 = ok, 0 = not found)');
+      if (selectedLog && selectedLog.id === logId) {
+        setSelectedLog({ ...selectedLog, status });
+      }
+    },
+    [selectedLog],
+  );
+
   const handleSelectLog = useCallback(
     async (log: LogEntry) => {
       logger.info(`Log selected: ${log.fileName} (${log.id})`);
@@ -239,9 +251,11 @@ export default function App() {
                   content={selectedLog.content}
                   logId={selectedLog.id}
                   projectId={selectedLog.projectId}
+                  currentStatus={selectedLog.status}
                   onErrorContextMenu={handleErrorContextMenu}
                   onPinError={handlePinError}
                   onBookmarkLine={handleBookmarkLine}
+                  onChangeLogStatus={handleChangeLogStatus}
                 />
               </div>
 
